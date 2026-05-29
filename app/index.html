@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -222,66 +222,67 @@
 <div id="panel">
   <h1>Sydney Transit Isochrone</h1>
   <div class="field">
-    <input type="text" id="address" placeholder="Adresse à Sydney…" autocomplete="off"/>
+    <input type="text" id="address" placeholder="Address in Sydney…" autocomplete="off"/>
     <div id="suggestions"></div>
   </div>
   <div class="row">
     <div class="field"><input type="date" id="date"/></div>
     <div class="field"><input type="time" id="time" value="08:00"/></div>
   </div>
-  <button id="btn" disabled>Calculer l'isochrone</button>
+  <button id="btn" disabled>Calculate isochrone</button>
 
   <!-- Feature D: mode robuste -->
   <div class="toggle-row">
     <input type="checkbox" id="chk-robust"/>
-    <label for="chk-robust">Mode robuste (médiane)</label>
+    <label for="chk-robust">Robust mode (median)</label>
   </div>
-  <div class="toggle-hint">Moyenne sur une fenêtre de départ au lieu d'un horaire unique. Calcul ~2-3× plus lent.</div>
+  <div class="toggle-hint">Averages over a departure window instead of a single time. ~2-3× slower to compute.</div>
 
   <!-- Feature B: comparaison -->
   <div class="toggle-row" style="margin-top:10px;">
     <input type="checkbox" id="chk-compare"/>
-    <label for="chk-compare">Comparer (jeu B)</label>
+    <label for="chk-compare">Compare (set B)</label>
   </div>
 
   <div id="compare-panel">
-    <h4>Jeu B — Preset horaire</h4>
+    <h4>Set B — Time preset</h4>
     <div class="preset-row">
-      <button class="preset-btn" data-preset="peak">Pointe 08:00</button>
-      <button class="preset-btn" data-preset="offpeak">Creux 13:00</button>
-      <button class="preset-btn" data-preset="evening">Soir 20:00</button>
-      <button class="preset-btn" data-preset="sunday">Dimanche</button>
+      <button class="preset-btn" data-preset="peak">Peak 08:00</button>
+      <button class="preset-btn" data-preset="offpeak">Midday 13:00</button>
+      <button class="preset-btn" data-preset="evening">Evening 20:00</button>
+      <button class="preset-btn" data-preset="sunday">Sunday</button>
     </div>
-    <h4>ou 2e origine</h4>
+    <h4>or 2nd origin</h4>
     <div class="field" style="margin-bottom:4px;">
-      <input type="text" id="address-b" placeholder="Adresse origine B…" autocomplete="off"/>
+      <input type="text" id="address-b" placeholder="Origin B address…" autocomplete="off"/>
       <div id="suggestions-b"></div>
     </div>
-    <button id="btn-compare" style="font-size:12px;padding:7px;">Calculer B et comparer</button>
+    <button id="btn-compare" style="font-size:12px;padding:7px;">Calculate B and compare</button>
   </div>
 
   <!-- Bouton pour réinitialiser l'origine (mode itinéraire actif) -->
-  <button id="btn-reset-origin" class="btn-secondary" style="display:none;">Changer l'origine</button>
+  <button id="btn-reset-origin" class="btn-secondary" style="display:none;">Change origin</button>
 
-  <div id="status">En attente d'OTP…</div>
+  <div id="status">Waiting for R5…</div>
 </div>
 
 <div id="otp-badge">
   <div class="dot busy" id="dot"></div>
-  <span id="otp-label">OTP démarre…</span>
+  <span id="otp-label">R5 starting…</span>
 </div>
 
 <div id="legend">
-  <h3>Temps de trajet</h3>
+  <h3>Travel time</h3>
   <div class="legend-item"><div class="swatch" style="background:#27ae60;opacity:.75"></div> 15 min</div>
   <div class="legend-item"><div class="swatch" style="background:#f1c40f;opacity:.75"></div> 30 min</div>
   <div class="legend-item"><div class="swatch" style="background:#e67e22;opacity:.75"></div> 45 min</div>
   <div class="legend-item"><div class="swatch" style="background:#e74c3c;opacity:.75"></div> 60 min</div>
+  <div class="legend-item"><div class="swatch" style="border:1.5px dashed #1a1a2e;background:none"></div> Inner Sydney</div>
 </div>
 
 <!-- Feature A: panneau insights -->
 <div id="insights">
-  <h3>Insights par bande</h3>
+  <h3>Insights by band</h3>
   <div id="insights-content"></div>
 </div>
 
@@ -310,6 +311,13 @@ const map = L.map('map', { doubleClickZoom: false }).setView([-33.8688, 151.2093
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
   attribution: '© OpenStreetMap © CARTO',
   subdomains: 'abcd', maxZoom: 19
+}).addTo(map);
+
+// Bornes du terrain de jeu : bbox "inner Sydney" (zone couverte par l'app).
+// Non-interactif pour ne pas intercepter les clics origine/itinéraire.
+const INNER_SYDNEY = [[-34.05, 151.05], [-33.75, 151.35]];
+L.rectangle(INNER_SYDNEY, {
+  color: '#1a1a2e', weight: 1.5, dashArray: '6 5', fill: false, interactive: false
 }).addTo(map);
 
 let marker = null, isoLayers = [], lat = null, lon = null, otpReady = false;
@@ -369,7 +377,7 @@ document.getElementById('btn-reset-origin').addEventListener('click', () => {
   isodrawn = false;
   document.getElementById('btn-reset-origin').style.display = 'none';
   document.getElementById('map-mode').className = '';
-  document.getElementById('status').textContent = 'Cliquez carte pour nouvelle origine';
+  document.getElementById('status').textContent = 'Click map to set a new origin';
 });
 
 // --- Feature C: calcul itinéraire ---
@@ -379,11 +387,11 @@ async function fetchItinerary(toLat, toLon) {
   try {
     const p = new URLSearchParams({ lat, lon, toLat, toLon, date, time, modes: 'TRANSIT,WALK' });
     const res = await fetch('/api/itinerary?' + p);
-    if (!res.ok) throw new Error(`Itinéraire: ${res.status}`);
+    if (!res.ok) throw new Error(`Itinerary: ${res.status}`);
     const data = await res.json();
     showItineraryPopup(toLat, toLon, data);
   } catch (e) {
-    L.popup().setLatLng([toLat, toLon]).setContent(`<b>Erreur:</b> ${e.message}`).openOn(map);
+    L.popup().setLatLng([toLat, toLon]).setContent(`<b>Error:</b> ${e.message}`).openOn(map);
   }
 }
 
@@ -402,9 +410,9 @@ function showItineraryPopup(toLat, toLon, data) {
       <div class="itin-bar-seg" style="width:${Math.max(vehPct,0)}%;background:#27ae60;"></div>
     </div>
     <div class="itin-legend">
-      <span class="itin-legend-item"><span class="itin-legend-dot" style="background:#4a90e2;"></span>Marche ${s.walk_min||0}min</span>
-      <span class="itin-legend-item"><span class="itin-legend-dot" style="background:#f39c12;"></span>Attente ${s.wait_min||0}min</span>
-      <span class="itin-legend-item"><span class="itin-legend-dot" style="background:#27ae60;"></span>Véhicule ${s.in_vehicle_min||0}min</span>
+      <span class="itin-legend-item"><span class="itin-legend-dot" style="background:#4a90e2;"></span>Walk ${s.walk_min||0}min</span>
+      <span class="itin-legend-item"><span class="itin-legend-dot" style="background:#f39c12;"></span>Wait ${s.wait_min||0}min</span>
+      <span class="itin-legend-item"><span class="itin-legend-dot" style="background:#27ae60;"></span>In-vehicle ${s.in_vehicle_min||0}min</span>
     </div>`;
 
   // Legs
@@ -415,9 +423,9 @@ function showItineraryPopup(toLat, toLon, data) {
   }).join('');
 
   const html = `<div class="itin-popup">
-    <h4>Itinéraire — ${total}min total</h4>
+    <h4>Itinerary — ${total}min total</h4>
     ${barHtml}
-    <div class="itin-legs">${legs || '<em>Aucune étape</em>'}</div>
+    <div class="itin-legs">${legs || '<em>No legs</em>'}</div>
   </div>`;
 
   L.popup({ maxWidth: 300 }).setLatLng([toLat, toLon]).setContent(html).openOn(map);
@@ -431,8 +439,8 @@ async function pollOTP() {
       const j = await r.json().catch(() => ({}));
       if (j.status === 'UP') {
         document.getElementById('dot').className = 'dot ready';
-        document.getElementById('otp-label').textContent = 'R5 prêt';
-        document.getElementById('status').textContent = 'Cliquez carte ou entrez une adresse';
+        document.getElementById('otp-label').textContent = 'R5 ready';
+        document.getElementById('status').textContent = 'Click map or enter an address';
         otpReady = true;
         if (lat !== null) document.getElementById('btn').disabled = false;
         return;
@@ -550,7 +558,7 @@ async function calculate() {
 
   btn.disabled = true;
   loader.className = 'on';
-  status.textContent = robust ? 'Calcul robuste en cours (médiane ~2-3× plus lent)…' : 'Calcul en cours…';
+  status.textContent = robust ? 'Computing robust isochrone (median, ~2-3× slower)…' : 'Computing…';
   status.className = '';
 
   isoLayers.forEach(l => map.removeLayer(l));
@@ -578,7 +586,7 @@ async function calculate() {
     if (!res.ok) throw new Error(`R5 ${res.status} — ${await res.text()}`);
 
     const geojson = await res.json();
-    if (!geojson.features?.length) throw new Error('Aucun résultat (vérifiez date/heure)');
+    if (!geojson.features?.length) throw new Error('No results (check date/time)');
 
     // Draw largest first (background), smallest last (foreground)
     const sorted = [...geojson.features].sort(
@@ -607,11 +615,11 @@ async function calculate() {
 
     isodrawn = true;
     // Activer le mode itinéraire: montrer l'indicateur
-    document.getElementById('map-mode').textContent = 'Cliquez pour calculer un itinéraire';
+    document.getElementById('map-mode').textContent = 'Click to calculate an itinerary';
     document.getElementById('map-mode').className = 'visible';
     document.getElementById('btn-reset-origin').style.display = 'block';
 
-    status.textContent = `${sorted.length} bandes · ${date} ${time.slice(0, 5)}${robust ? ' (robuste)' : ''}`;
+    status.textContent = `${sorted.length} bands · ${date} ${time.slice(0, 5)}${robust ? ' (robust)' : ''}`;
 
   } catch (e) {
     status.textContent = e.message;
@@ -694,14 +702,14 @@ async function calculateB() {
     bLat = latB; bLon = lonB;
     bDate = baseDate; bTime = baseTime;
   } else {
-    alert('Choisissez un preset ou entrez une adresse B');
+    alert('Choose a preset or enter an origin B address');
     return;
   }
 
   const loader = document.getElementById('loader');
   const status = document.getElementById('status');
   loader.className = 'on';
-  status.textContent = 'Calcul jeu B…';
+  status.textContent = 'Computing set B…';
 
   isoLayersB.forEach(l => map.removeLayer(l));
   isoLayersB = [];
@@ -720,7 +728,7 @@ async function calculateB() {
     const res = await fetch('/api/isochrone?' + p);
     if (!res.ok) throw new Error(`B: ${res.status}`);
     const geojson = await res.json();
-    if (!geojson.features?.length) throw new Error('Aucun résultat pour B');
+    if (!geojson.features?.length) throw new Error('No results for B');
 
     const sorted = [...geojson.features].sort(
       (a, b) => (b.properties.cutoffMinutes ?? 0) - (a.properties.cutoffMinutes ?? 0)
@@ -747,7 +755,7 @@ async function calculateB() {
     // Panneau stats A vs B
     renderCompareStats(lastInsightsA, lastInsightsB, bDate, bTime, activePreset, bLat, bLon);
 
-    status.textContent = `Comparaison affichée (${bDate} ${bTime})`;
+    status.textContent = `Comparison displayed (${bDate} ${bTime})`;
 
   } catch (e) {
     status.textContent = e.message;
@@ -771,7 +779,7 @@ function renderCompareStats(dataA, dataB, bDate, bTime, preset, bLat, bLon) {
 
   let html = `<div style="font-size:11px;color:#888;margin-bottom:6px;">A vs B — ${label}</div>`;
   html += `<table style="width:100%;font-size:12px;border-collapse:collapse;">
-    <tr style="color:#888;font-size:11px;"><th style="text-align:left;">Bande</th><th>km² A</th><th>km² B</th><th>Δ</th></tr>`;
+    <tr style="color:#888;font-size:11px;"><th style="text-align:left;">Band</th><th>km² A</th><th>km² B</th><th>Δ</th></tr>`;
 
   CUTOFFS.slice().reverse().forEach(c => {
     const a = mapA[c.min]; const b = mapB[c.min];
