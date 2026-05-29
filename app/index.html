@@ -603,7 +603,7 @@ async function calculate() {
       isoLayers.push(layer);
     });
 
-    map.fitBounds(L.featureGroup(isoLayers).getBounds(), { padding: [40, 40] });
+    // Garde le zoom/centre courant après calcul (pas de recadrage automatique)
 
     // Extraire les insights (surface + POI) depuis les propriétés
     lastInsightsA = sorted.map(f => ({
