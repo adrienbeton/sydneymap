@@ -10,6 +10,8 @@ data/*
 
 # Tooling / test artifacts
 .playwright-mcp/
+screenshot-*.png
+page-*.png
 __pycache__/
 *.pyc
 

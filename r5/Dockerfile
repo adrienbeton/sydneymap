@@ -1,7 +1,7 @@
 FROM eclipse-temurin:21-jre-jammy
 
 RUN apt-get update \
- && apt-get install -y --no-install-recommends python3 python3-pip curl \
+ && apt-get install -y --no-install-recommends python3 python3-pip curl osmium-tool \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -14,7 +14,7 @@ RUN mkdir -p /opt/r5 \
  && curl -fL -o /opt/r5/r5.jar \
     https://github.com/r5py/r5/releases/download/v7.5.1-r5py/r5-v7.5.1-r5py-all.jar
 
-COPY server.py .
+COPY server.py insights.py ./
 
 ENV R5_JAR=/opt/r5/r5.jar \
     R5_MAX_MEMORY=6G \

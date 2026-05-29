@@ -53,8 +53,100 @@
     button:hover { background: #2d2d4e; }
     button:disabled { background: #9e9e9e; cursor: not-allowed; }
 
+    /* Bouton secondaire (changer origine) */
+    .btn-secondary {
+      background: transparent;
+      color: #4a90e2;
+      border: 1px solid #4a90e2;
+      font-size: 12px;
+      padding: 6px 10px;
+      margin-top: 4px;
+    }
+    .btn-secondary:hover { background: #f0f6ff; }
+
     #status { font-size: 12px; color: #888; margin-top: 8px; min-height: 18px; text-align: center; }
     #status.error { color: #e74c3c; }
+
+    /* Contrôles additionnels (robust + compare) */
+    .toggle-row {
+      display: flex; align-items: center; gap: 8px;
+      margin-top: 8px; font-size: 12px; color: #555;
+    }
+    .toggle-row input[type=checkbox] { cursor: pointer; }
+    .toggle-row label { cursor: pointer; user-select: none; }
+    .toggle-hint {
+      font-size: 11px; color: #aaa; margin-top: 2px;
+      line-height: 1.3;
+    }
+
+    /* Panneau comparaison (B) */
+    #compare-panel {
+      margin-top: 10px;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      display: none;
+    }
+    #compare-panel.visible { display: block; }
+    #compare-panel h4 { font-size: 12px; font-weight: 600; color: #555; margin-bottom: 8px; }
+
+    .preset-row { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px; }
+    .preset-btn {
+      padding: 4px 8px; font-size: 11px;
+      background: white; color: #1a1a2e;
+      border: 1px solid #ccc; border-radius: 6px;
+      cursor: pointer; transition: background 0.15s;
+      width: auto; margin-top: 0;
+    }
+    .preset-btn:hover { background: #e8eaf6; }
+    .preset-btn.active { background: #1a1a2e; color: white; border-color: #1a1a2e; }
+
+    /* Panneau insights (A) */
+    #insights {
+      position: absolute;
+      bottom: 32px; left: 16px;
+      z-index: 1000;
+      background: white;
+      border-radius: 10px;
+      padding: 12px 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      max-width: 340px;
+      display: none;
+    }
+    #insights.visible { display: block; }
+    #insights h3 {
+      font-size: 11px; font-weight: 600; color: #888;
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;
+    }
+    .insight-row {
+      display: flex; align-items: center; gap: 6px;
+      margin-bottom: 5px; font-size: 12px; color: #333;
+    }
+    .insight-swatch { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+    .insight-label { font-weight: 600; min-width: 36px; }
+    .insight-stats { color: #555; }
+    /* Pour comparaison B, diffs positifs en vert, négatifs en rouge */
+    .diff-pos { color: #27ae60; }
+    .diff-neg { color: #e74c3c; }
+
+    /* Panneau stats A vs B (B feature) */
+    #compare-stats {
+      position: absolute;
+      bottom: 32px; left: 16px;
+      z-index: 1000;
+      background: white;
+      border-radius: 10px;
+      padding: 12px 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      max-width: 380px;
+      display: none;
+    }
+    #compare-stats.visible { display: block; }
+    #compare-stats h3 {
+      font-size: 11px; font-weight: 600; color: #888;
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;
+    }
 
     #legend {
       position: absolute; bottom: 32px; right: 16px;
@@ -68,6 +160,18 @@
     }
     .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; font-size: 13px; color: #333; }
     .swatch { width: 20px; height: 14px; border-radius: 3px; }
+
+    /* Indicateur de mode carte */
+    #map-mode {
+      position: absolute; bottom: 12px; left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      background: rgba(26,26,46,0.85); color: white;
+      padding: 5px 14px; border-radius: 20px;
+      font-size: 12px; pointer-events: none;
+      display: none;
+    }
+    #map-mode.visible { display: block; }
 
     #otp-badge {
       position: absolute; top: 16px; right: 16px;
@@ -94,6 +198,22 @@
       border-radius: 50%; animation: spin 0.8s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Popup itinéraire */
+    .itin-popup { min-width: 220px; max-width: 280px; }
+    .itin-popup h4 { font-size: 13px; font-weight: 600; color: #1a1a2e; margin-bottom: 8px; }
+    .itin-bar {
+      display: flex; height: 12px; border-radius: 4px;
+      overflow: hidden; margin-bottom: 6px;
+    }
+    .itin-bar-seg { height: 100%; }
+    .itin-legend { display: flex; gap: 10px; font-size: 11px; color: #555; margin-bottom: 8px; }
+    .itin-legend-item { display: flex; align-items: center; gap: 3px; }
+    .itin-legend-dot { width: 8px; height: 8px; border-radius: 2px; }
+    .itin-legs { font-size: 12px; color: #333; }
+    .itin-leg { padding: 3px 0; border-bottom: 1px solid #f0f0f0; }
+    .itin-leg:last-child { border-bottom: none; }
+    .itin-mode { font-weight: 600; }
   </style>
 </head>
 <body>
@@ -110,6 +230,39 @@
     <div class="field"><input type="time" id="time" value="08:00"/></div>
   </div>
   <button id="btn" disabled>Calculer l'isochrone</button>
+
+  <!-- Feature D: mode robuste -->
+  <div class="toggle-row">
+    <input type="checkbox" id="chk-robust"/>
+    <label for="chk-robust">Mode robuste (médiane)</label>
+  </div>
+  <div class="toggle-hint">Moyenne sur une fenêtre de départ au lieu d'un horaire unique. Calcul ~2-3× plus lent.</div>
+
+  <!-- Feature B: comparaison -->
+  <div class="toggle-row" style="margin-top:10px;">
+    <input type="checkbox" id="chk-compare"/>
+    <label for="chk-compare">Comparer (jeu B)</label>
+  </div>
+
+  <div id="compare-panel">
+    <h4>Jeu B — Preset horaire</h4>
+    <div class="preset-row">
+      <button class="preset-btn" data-preset="peak">Pointe 08:00</button>
+      <button class="preset-btn" data-preset="offpeak">Creux 13:00</button>
+      <button class="preset-btn" data-preset="evening">Soir 20:00</button>
+      <button class="preset-btn" data-preset="sunday">Dimanche</button>
+    </div>
+    <h4>ou 2e origine</h4>
+    <div class="field" style="margin-bottom:4px;">
+      <input type="text" id="address-b" placeholder="Adresse origine B…" autocomplete="off"/>
+      <div id="suggestions-b"></div>
+    </div>
+    <button id="btn-compare" style="font-size:12px;padding:7px;">Calculer B et comparer</button>
+  </div>
+
+  <!-- Bouton pour réinitialiser l'origine (mode itinéraire actif) -->
+  <button id="btn-reset-origin" class="btn-secondary" style="display:none;">Changer l'origine</button>
+
   <div id="status">En attente d'OTP…</div>
 </div>
 
@@ -126,6 +279,21 @@
   <div class="legend-item"><div class="swatch" style="background:#e74c3c;opacity:.75"></div> 60 min</div>
 </div>
 
+<!-- Feature A: panneau insights -->
+<div id="insights">
+  <h3>Insights par bande</h3>
+  <div id="insights-content"></div>
+</div>
+
+<!-- Feature B: stats comparaison A vs B -->
+<div id="compare-stats">
+  <h3>A vs B</h3>
+  <div id="compare-stats-content"></div>
+</div>
+
+<!-- Indicateur mode carte -->
+<div id="map-mode"></div>
+
 <div id="loader"><div class="spinner"></div></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -138,15 +306,20 @@ const CUTOFFS = [
 ];
 
 // Map
-const map = L.map('map').setView([-33.8688, 151.2093], 12);
+const map = L.map('map', { doubleClickZoom: false }).setView([-33.8688, 151.2093], 12);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
   attribution: '© OpenStreetMap © CARTO',
   subdomains: 'abcd', maxZoom: 19
 }).addTo(map);
 
 let marker = null, isoLayers = [], lat = null, lon = null, otpReady = false;
+// Feature B: état comparaison
+let isoLayersB = [], latB = null, lonB = null, lastInsightsA = null, lastInsightsB = null;
+let activePreset = null;
+// Indique si une isochrone A est affichée (active le mode itinéraire au clic)
+let isodrawn = false;
 
-// Default date: next weekday
+// Default date: prochain jour de semaine à partir d'aujourd'hui
 const d = new Date();
 if (d.getDay() === 6) d.setDate(d.getDate() + 2);
 if (d.getDay() === 0) d.setDate(d.getDate() + 1);
@@ -154,17 +327,103 @@ document.getElementById('date').value = d.toISOString().split('T')[0];
 
 function setOrigin(la, lo, label) {
   lat = la; lon = lo;
+  isodrawn = false; // reset: prochain clic redéfinit si besoin
   if (marker) map.removeLayer(marker);
   marker = L.circleMarker([la, lo], {
     radius: 8, fillColor: '#1a1a2e', fillOpacity: 1, color: 'white', weight: 2
   }).addTo(map);
   if (label) document.getElementById('address').value = label;
   document.getElementById('btn').disabled = !otpReady;
+  document.getElementById('btn-reset-origin').style.display = 'none';
+  document.getElementById('map-mode').className = '';
 }
 
-map.on('click', e => setOrigin(e.latlng.lat, e.latlng.lng, null));
+// --- Feature C: gestion du clic carte ---
+// Logique: si aucune origine ou isochrone non encore calculée → setOrigin
+//          si isochrone calculée (isodrawn) → calculer itinéraire vers ce point
+map.on('click', async e => {
+  if (!isodrawn || !otpReady) {
+    setOrigin(e.latlng.lat, e.latlng.lng, null);
+    return;
+  }
+  // Mode itinéraire
+  await fetchItinerary(e.latlng.lat, e.latlng.lng);
+});
 
-// R5 backend health polling — /api/health returns {status:"UP"} once the network is built
+// Nettoie complètement la carte : isochrones A+B, panneaux, popups, origine
+function clearMap() {
+  isoLayers.forEach(l => map.removeLayer(l));  isoLayers = [];
+  isoLayersB.forEach(l => map.removeLayer(l)); isoLayersB = [];
+  if (marker) { map.removeLayer(marker); marker = null; }
+  lat = lon = latB = lonB = null;
+  lastInsightsA = lastInsightsB = null;
+  document.getElementById('insights').className = '';
+  document.getElementById('compare-stats').className = '';
+  map.closePopup();
+  document.getElementById('btn').disabled = true;
+}
+
+// Bouton pour réinitialiser l'origine en mode itinéraire
+document.getElementById('btn-reset-origin').addEventListener('click', () => {
+  clearMap();
+  isodrawn = false;
+  document.getElementById('btn-reset-origin').style.display = 'none';
+  document.getElementById('map-mode').className = '';
+  document.getElementById('status').textContent = 'Cliquez carte pour nouvelle origine';
+});
+
+// --- Feature C: calcul itinéraire ---
+async function fetchItinerary(toLat, toLon) {
+  const date = document.getElementById('date').value;
+  const time = document.getElementById('time').value;
+  try {
+    const p = new URLSearchParams({ lat, lon, toLat, toLon, date, time, modes: 'TRANSIT,WALK' });
+    const res = await fetch('/api/itinerary?' + p);
+    if (!res.ok) throw new Error(`Itinéraire: ${res.status}`);
+    const data = await res.json();
+    showItineraryPopup(toLat, toLon, data);
+  } catch (e) {
+    L.popup().setLatLng([toLat, toLon]).setContent(`<b>Erreur:</b> ${e.message}`).openOn(map);
+  }
+}
+
+function showItineraryPopup(toLat, toLon, data) {
+  const s = data.summary || {};
+  const total = s.total_min || 1;
+  const walkPct  = Math.round((s.walk_min || 0) / total * 100);
+  const waitPct  = Math.round((s.wait_min || 0) / total * 100);
+  const vehPct   = 100 - walkPct - waitPct;
+
+  // Barre empilée
+  const barHtml = `
+    <div class="itin-bar">
+      <div class="itin-bar-seg" style="width:${walkPct}%;background:#4a90e2;"></div>
+      <div class="itin-bar-seg" style="width:${waitPct}%;background:#f39c12;"></div>
+      <div class="itin-bar-seg" style="width:${Math.max(vehPct,0)}%;background:#27ae60;"></div>
+    </div>
+    <div class="itin-legend">
+      <span class="itin-legend-item"><span class="itin-legend-dot" style="background:#4a90e2;"></span>Marche ${s.walk_min||0}min</span>
+      <span class="itin-legend-item"><span class="itin-legend-dot" style="background:#f39c12;"></span>Attente ${s.wait_min||0}min</span>
+      <span class="itin-legend-item"><span class="itin-legend-dot" style="background:#27ae60;"></span>Véhicule ${s.in_vehicle_min||0}min</span>
+    </div>`;
+
+  // Legs
+  const legs = (data.legs || []).map(leg => {
+    const dur = Math.round((leg.duration_s || 0) / 60);
+    const route = leg.route ? ` (${leg.route})` : '';
+    return `<div class="itin-leg"><span class="itin-mode">${leg.mode||'?'}</span>${route} — ${dur}min</div>`;
+  }).join('');
+
+  const html = `<div class="itin-popup">
+    <h4>Itinéraire — ${total}min total</h4>
+    ${barHtml}
+    <div class="itin-legs">${legs || '<em>Aucune étape</em>'}</div>
+  </div>`;
+
+  L.popup({ maxWidth: 300 }).setLatLng([toLat, toLon]).setContent(html).openOn(map);
+}
+
+// R5 backend health polling
 async function pollOTP() {
   try {
     const r = await fetch('/api/health', { signal: AbortSignal.timeout(3000) });
@@ -193,37 +452,91 @@ addrInput.addEventListener('input', () => {
   clearTimeout(geoTimer);
   const q = addrInput.value.trim();
   if (q.length < 3) { sugEl.innerHTML = ''; return; }
-  geoTimer = setTimeout(() => geocode(q), 400);
+  geoTimer = setTimeout(() => geocode(q, sugEl, (la, lo, name) => {
+    setOrigin(la, lo, name);
+    map.setView([la, lo], 14);
+  }), 400);
 });
 
 addrInput.addEventListener('keydown', e => {
   if (e.key === 'Enter' && lat !== null) calculate();
 });
 
-async function geocode(q) {
+async function geocode(q, container, onSelect) {
   try {
     const p = new URLSearchParams({ q: q + ', Sydney NSW', format: 'json', limit: 5, countrycodes: 'au' });
     const res = await fetch('https://nominatim.openstreetmap.org/search?' + p, {
       headers: { 'Accept-Language': 'en' }
     });
     const results = await res.json();
-    sugEl.innerHTML = '';
+    container.innerHTML = '';
     results.forEach(r => {
       const div = document.createElement('div');
       div.className = 'suggestion';
       const name = r.display_name.replace(/, (New South Wales|NSW), Australia$/, '').replace(/, Australia$/, '');
       div.textContent = name;
       div.onclick = () => {
-        sugEl.innerHTML = '';
-        setOrigin(parseFloat(r.lat), parseFloat(r.lon), name.split(',')[0]);
-        map.setView([parseFloat(r.lat), parseFloat(r.lon)], 14);
+        container.innerHTML = '';
+        onSelect(parseFloat(r.lat), parseFloat(r.lon), name.split(',')[0]);
       };
-      sugEl.appendChild(div);
+      container.appendChild(div);
     });
   } catch {}
 }
 
-document.addEventListener('click', e => { if (!e.target.closest('#panel')) sugEl.innerHTML = ''; });
+document.addEventListener('click', e => {
+  if (!e.target.closest('#panel')) {
+    sugEl.innerHTML = '';
+    document.getElementById('suggestions-b').innerHTML = '';
+  }
+});
+
+// --- Feature B: geocoding adresse B ---
+const addrInputB = document.getElementById('address-b');
+const sugElB = document.getElementById('suggestions-b');
+let geoTimerB = null;
+
+addrInputB.addEventListener('input', () => {
+  clearTimeout(geoTimerB);
+  const q = addrInputB.value.trim();
+  if (q.length < 3) { sugElB.innerHTML = ''; return; }
+  geoTimerB = setTimeout(() => geocode(q, sugElB, (la, lo, name) => {
+    latB = la; lonB = lo;
+    addrInputB.value = name;
+    map.setView([la, lo], 13);
+  }), 400);
+});
+
+// --- Feature B: toggle comparaison ---
+document.getElementById('chk-compare').addEventListener('change', e => {
+  document.getElementById('compare-panel').className = e.target.checked ? 'visible' : '';
+  if (!e.target.checked) {
+    // Nettoyer les layers B
+    isoLayersB.forEach(l => map.removeLayer(l));
+    isoLayersB = [];
+    document.getElementById('compare-stats').className = '';
+    // Réafficher insights A seuls
+    if (lastInsightsA) renderInsights(lastInsightsA, null);
+  }
+});
+
+// --- Feature B: presets ---
+document.querySelectorAll('.preset-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activePreset = btn.dataset.preset;
+    // Réinitialiser adresse B si preset sélectionné
+    latB = null; lonB = null;
+    addrInputB.value = '';
+  });
+});
+
+// --- Feature D: toggle robuste ---
+document.getElementById('chk-robust').addEventListener('change', () => {
+  // Déclenche un recalcul si une isochrone est déjà affichée
+  if (isodrawn) calculate();
+});
 
 // Calculate
 document.getElementById('btn').addEventListener('click', calculate);
@@ -233,14 +546,20 @@ async function calculate() {
   const btn = document.getElementById('btn');
   const loader = document.getElementById('loader');
   const status = document.getElementById('status');
+  const robust = document.getElementById('chk-robust').checked;
 
   btn.disabled = true;
   loader.className = 'on';
-  status.textContent = 'Calcul en cours…';
+  status.textContent = robust ? 'Calcul robuste en cours (médiane ~2-3× plus lent)…' : 'Calcul en cours…';
   status.className = '';
 
   isoLayers.forEach(l => map.removeLayer(l));
   isoLayers = [];
+  isoLayersB.forEach(l => map.removeLayer(l));
+  isoLayersB = [];
+  document.getElementById('insights').className = '';
+  document.getElementById('compare-stats').className = '';
+  lastInsightsA = null; lastInsightsB = null;
 
   try {
     const date = document.getElementById('date').value;
@@ -253,6 +572,7 @@ async function calculate() {
       modes: 'TRANSIT,WALK',
       cutoffs: CUTOFFS.map(c => c.min).join(','),
     });
+    if (robust) p.set('robust', 'true');
 
     const res = await fetch('/api/isochrone?' + p);
     if (!res.ok) throw new Error(`R5 ${res.status} — ${await res.text()}`);
@@ -276,15 +596,203 @@ async function calculate() {
     });
 
     map.fitBounds(L.featureGroup(isoLayers).getBounds(), { padding: [40, 40] });
-    status.textContent = `${sorted.length} bandes calculées · ${date} ${time.slice(0, 5)}`;
+
+    // Extraire les insights (surface + POI) depuis les propriétés
+    lastInsightsA = sorted.map(f => ({
+      mins: f.properties.cutoffMinutes ?? f.properties.time,
+      area: f.properties.area_km2,
+      pois: f.properties.pois || {},
+    }));
+    renderInsights(lastInsightsA, null);
+
+    isodrawn = true;
+    // Activer le mode itinéraire: montrer l'indicateur
+    document.getElementById('map-mode').textContent = 'Cliquez pour calculer un itinéraire';
+    document.getElementById('map-mode').className = 'visible';
+    document.getElementById('btn-reset-origin').style.display = 'block';
+
+    status.textContent = `${sorted.length} bandes · ${date} ${time.slice(0, 5)}${robust ? ' (robuste)' : ''}`;
+
+  } catch (e) {
+    status.textContent = e.message;
+    status.className = 'error';
+    isodrawn = false;
+  } finally {
+    btn.disabled = false;
+    loader.className = '';
+  }
+}
+
+// --- Feature A: rendu panneau insights ---
+function renderInsights(dataA, dataB) {
+  const el = document.getElementById('insights');
+  const content = document.getElementById('insights-content');
+
+  if (!dataA || !dataA.length) { el.className = ''; return; }
+
+  // Trier par cutoffMinutes asc pour affichage
+  const sortedA = [...dataA].sort((a, b) => a.mins - b.mins);
+  const mapB = {};
+  if (dataB) dataB.forEach(d => { mapB[d.mins] = d; });
+
+  let html = '';
+  sortedA.forEach(row => {
+    const cfg = CUTOFFS.find(c => c.min === row.mins) || CUTOFFS[0];
+    const area = row.area != null ? row.area.toFixed(1) : '?';
+    const pois = row.pois;
+    const sup = pois.supermarket || pois.supermarkets || 0;
+    const park = pois.park || pois.parks || 0;
+    const food = pois.food || pois.restaurant || 0;
+
+    let diffHtml = '';
+    if (dataB && mapB[row.mins]) {
+      const b = mapB[row.mins];
+      const areaB = b.area != null ? b.area.toFixed(1) : '?';
+      const aDiff = (b.area - row.area).toFixed(1);
+      const cls = aDiff >= 0 ? 'diff-pos' : 'diff-neg';
+      diffHtml = ` <span class="${cls}">(B: ${areaB} km²${aDiff >= 0 ? '+' : ''}${aDiff})</span>`;
+    }
+
+    html += `<div class="insight-row">
+      <div class="insight-swatch" style="background:${cfg.color};"></div>
+      <span class="insight-label">${row.mins}min</span>
+      <span class="insight-stats">${area} km²${diffHtml} · 🛒${sup} 🌳${park} 🍽${food}</span>
+    </div>`;
+  });
+
+  content.innerHTML = html;
+  el.className = 'visible';
+}
+
+// --- Feature B: calcul comparaison ---
+document.getElementById('btn-compare').addEventListener('click', calculateB);
+
+async function calculateB() {
+  if (!otpReady) return;
+
+  // Déterminer les params de B: preset ou adresse B
+  let bLat, bLon, bDate, bTime;
+  const baseDate = document.getElementById('date').value;
+  const baseTime = document.getElementById('time').value;
+
+  if (activePreset) {
+    // Même origine, heure/date différente
+    bLat = lat; bLon = lon;
+    if (activePreset === 'peak')    { bDate = baseDate; bTime = '08:00'; }
+    if (activePreset === 'offpeak') { bDate = baseDate; bTime = '13:00'; }
+    if (activePreset === 'evening') { bDate = baseDate; bTime = '20:00'; }
+    if (activePreset === 'sunday') {
+      // Prochain dimanche
+      const dd = new Date(baseDate);
+      const daysUntilSun = (7 - dd.getDay()) % 7 || 7;
+      dd.setDate(dd.getDate() + daysUntilSun);
+      bDate = dd.toISOString().split('T')[0];
+      bTime = baseTime;
+    }
+  } else if (latB && lonB) {
+    // 2e origine, même date/heure
+    bLat = latB; bLon = lonB;
+    bDate = baseDate; bTime = baseTime;
+  } else {
+    alert('Choisissez un preset ou entrez une adresse B');
+    return;
+  }
+
+  const loader = document.getElementById('loader');
+  const status = document.getElementById('status');
+  loader.className = 'on';
+  status.textContent = 'Calcul jeu B…';
+
+  isoLayersB.forEach(l => map.removeLayer(l));
+  isoLayersB = [];
+
+  try {
+    const robust = document.getElementById('chk-robust').checked;
+    const p = new URLSearchParams({
+      lat: bLat, lon: bLon,
+      date: bDate,
+      time: bTime,
+      modes: 'TRANSIT,WALK',
+      cutoffs: CUTOFFS.map(c => c.min).join(','),
+    });
+    if (robust) p.set('robust', 'true');
+
+    const res = await fetch('/api/isochrone?' + p);
+    if (!res.ok) throw new Error(`B: ${res.status}`);
+    const geojson = await res.json();
+    if (!geojson.features?.length) throw new Error('Aucun résultat pour B');
+
+    const sorted = [...geojson.features].sort(
+      (a, b) => (b.properties.cutoffMinutes ?? 0) - (a.properties.cutoffMinutes ?? 0)
+    );
+
+    // Rendu B: contour hachuré, pas de fill
+    sorted.forEach(f => {
+      const mins = f.properties.cutoffMinutes ?? f.properties.time;
+      const cfg = CUTOFFS.find(c => c.min === mins) ?? CUTOFFS[0];
+      const layer = L.geoJSON(f, {
+        style: { fillOpacity: 0, color: cfg.color, weight: 2.5, opacity: 0.85, dashArray: '6,5' }
+      }).addTo(map);
+      isoLayersB.push(layer);
+    });
+
+    lastInsightsB = sorted.map(f => ({
+      mins: f.properties.cutoffMinutes ?? f.properties.time,
+      area: f.properties.area_km2,
+      pois: f.properties.pois || {},
+    }));
+
+    // Mettre à jour insights A avec diffs
+    renderInsights(lastInsightsA, lastInsightsB);
+    // Panneau stats A vs B
+    renderCompareStats(lastInsightsA, lastInsightsB, bDate, bTime, activePreset, bLat, bLon);
+
+    status.textContent = `Comparaison affichée (${bDate} ${bTime})`;
 
   } catch (e) {
     status.textContent = e.message;
     status.className = 'error';
   } finally {
-    btn.disabled = false;
     loader.className = '';
   }
+}
+
+// --- Feature B: panneau stats A vs B ---
+function renderCompareStats(dataA, dataB, bDate, bTime, preset, bLat, bLon) {
+  const el = document.getElementById('compare-stats');
+  const content = document.getElementById('compare-stats-content');
+  if (!dataA || !dataB) { el.className = ''; return; }
+
+  const mapA = {}, mapB = {};
+  dataA.forEach(d => { mapA[d.mins] = d; });
+  dataB.forEach(d => { mapB[d.mins] = d; });
+
+  const label = preset ? `Preset: ${preset} (${bTime})` : `Origine B (${bLat?.toFixed(3)},${bLon?.toFixed(3)})`;
+
+  let html = `<div style="font-size:11px;color:#888;margin-bottom:6px;">A vs B — ${label}</div>`;
+  html += `<table style="width:100%;font-size:12px;border-collapse:collapse;">
+    <tr style="color:#888;font-size:11px;"><th style="text-align:left;">Bande</th><th>km² A</th><th>km² B</th><th>Δ</th></tr>`;
+
+  CUTOFFS.slice().reverse().forEach(c => {
+    const a = mapA[c.min]; const b = mapB[c.min];
+    if (!a && !b) return;
+    const aArea = a?.area?.toFixed(1) ?? '?';
+    const bArea = b?.area?.toFixed(1) ?? '?';
+    const delta = (a?.area != null && b?.area != null) ? (b.area - a.area).toFixed(1) : '?';
+    const cls = parseFloat(delta) >= 0 ? 'diff-pos' : 'diff-neg';
+    html += `<tr>
+      <td><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${c.color};margin-right:4px;"></span>${c.min}min</td>
+      <td style="text-align:center;">${aArea}</td>
+      <td style="text-align:center;">${bArea}</td>
+      <td style="text-align:center;" class="${cls}">${delta !== '?' ? (parseFloat(delta) >= 0 ? '+' : '') + delta : '?'}</td>
+    </tr>`;
+  });
+  html += '</table>';
+
+  content.innerHTML = html;
+  // Décaler insights pour ne pas chevaucher si les deux sont visibles
+  document.getElementById('insights').style.display = 'none';
+  el.className = 'visible';
 }
 </script>
 </body>

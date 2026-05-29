@@ -1,3 +1,6 @@
 r5py==1.1.6
 fastapi==0.115.6
 uvicorn[standard]==0.34.0
+shapely>=2.0
+pyproj>=3.0
+osmium>=3.7
