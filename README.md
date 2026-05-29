@@ -2,7 +2,7 @@
 
 **Generate transit isochrone maps for inner Sydney — see how far you can travel by public transport in 15, 30, 45, or 60 minutes.**
 
-![Sydney Transit Isochrone — concentric reachability bands with per-zone insights and click-to-route itineraries](assets/screenshot.webp)
+![Sydney Transit Isochrone demo — pick an origin, watch reachability bands compute, then click any zone for a full transit itinerary](assets/demo.gif)
 
 ---
 

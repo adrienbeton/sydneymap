@@ -15,5 +15,9 @@ page-*.png
 __pycache__/
 *.pyc
 
+# Demo video sources (kept local; committed asset is assets/demo.gif)
+demo.mp4
+demo-linkedin.mp4
+
 # OS
 .DS_Store
