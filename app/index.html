@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sydney Transit Isochrone</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    #map { position: absolute; inset: 0; }
+
+    #panel {
+      position: absolute;
+      top: 16px; left: 16px;
+      z-index: 1000;
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+      width: 300px;
+    }
+    #panel h1 { font-size: 15px; font-weight: 600; color: #1a1a2e; margin-bottom: 12px; }
+
+    .field { margin-bottom: 10px; position: relative; }
+    input[type=text], input[type=date], input[type=time] {
+      width: 100%; padding: 8px 12px;
+      border: 1px solid #e0e0e0; border-radius: 8px;
+      font-size: 14px; outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus { border-color: #4a90e2; }
+    .row { display: flex; gap: 8px; }
+    .row .field { flex: 1; }
+
+    #suggestions {
+      position: absolute; top: 100%; left: 0; right: 0;
+      background: white; border: 1px solid #e0e0e0;
+      border-top: none; border-radius: 0 0 8px 8px;
+      max-height: 200px; overflow-y: auto;
+      z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .suggestion { padding: 8px 12px; font-size: 13px; cursor: pointer; color: #333; }
+    .suggestion:hover { background: #f5f5f5; }
+
+    button {
+      width: 100%; padding: 10px;
+      background: #1a1a2e; color: white;
+      border: none; border-radius: 8px;
+      font-size: 14px; font-weight: 500;
+      cursor: pointer; transition: background 0.2s; margin-top: 4px;
+    }
+    button:hover { background: #2d2d4e; }
+    button:disabled { background: #9e9e9e; cursor: not-allowed; }
+
+    #status { font-size: 12px; color: #888; margin-top: 8px; min-height: 18px; text-align: center; }
+    #status.error { color: #e74c3c; }
+
+    #legend {
+      position: absolute; bottom: 32px; right: 16px;
+      z-index: 1000; background: white;
+      border-radius: 10px; padding: 12px 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    #legend h3 {
+      font-size: 11px; font-weight: 600; color: #888;
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;
+    }
+    .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; font-size: 13px; color: #333; }
+    .swatch { width: 20px; height: 14px; border-radius: 3px; }
+
+    #otp-badge {
+      position: absolute; top: 16px; right: 16px;
+      z-index: 1000; background: white; border-radius: 20px;
+      padding: 6px 12px; font-size: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #e0e0e0; }
+    .dot.ready  { background: #27ae60; }
+    .dot.busy   { background: #f39c12; animation: pulse 1s infinite; }
+    .dot.error  { background: #e74c3c; }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+
+    #loader {
+      display: none; position: absolute; inset: 0;
+      background: rgba(255,255,255,0.45); z-index: 2000;
+      align-items: center; justify-content: center;
+    }
+    #loader.on { display: flex; }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid #ddd; border-top-color: #1a1a2e;
+      border-radius: 50%; animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+<div id="map"></div>
+
+<div id="panel">
+  <h1>Sydney Transit Isochrone</h1>
+  <div class="field">
+    <input type="text" id="address" placeholder="Adresse à Sydney…" autocomplete="off"/>
+    <div id="suggestions"></div>
+  </div>
+  <div class="row">
+    <div class="field"><input type="date" id="date"/></div>
+    <div class="field"><input type="time" id="time" value="08:00"/></div>
+  </div>
+  <button id="btn" disabled>Calculer l'isochrone</button>
+  <div id="status">En attente d'OTP…</div>
+</div>
+
+<div id="otp-badge">
+  <div class="dot busy" id="dot"></div>
+  <span id="otp-label">OTP démarre…</span>
+</div>
+
+<div id="legend">
+  <h3>Temps de trajet</h3>
+  <div class="legend-item"><div class="swatch" style="background:#27ae60;opacity:.75"></div> 15 min</div>
+  <div class="legend-item"><div class="swatch" style="background:#f1c40f;opacity:.75"></div> 30 min</div>
+  <div class="legend-item"><div class="swatch" style="background:#e67e22;opacity:.75"></div> 45 min</div>
+  <div class="legend-item"><div class="swatch" style="background:#e74c3c;opacity:.75"></div> 60 min</div>
+</div>
+
+<div id="loader"><div class="spinner"></div></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const CUTOFFS = [
+  { min: 60, color: '#e74c3c' },
+  { min: 45, color: '#e67e22' },
+  { min: 30, color: '#f1c40f' },
+  { min: 15, color: '#27ae60' },
+];
+
+// Map
+const map = L.map('map').setView([-33.8688, 151.2093], 12);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  attribution: '© OpenStreetMap © CARTO',
+  subdomains: 'abcd', maxZoom: 19
+}).addTo(map);
+
+let marker = null, isoLayers = [], lat = null, lon = null, otpReady = false;
+
+// Default date: next weekday
+const d = new Date();
+if (d.getDay() === 6) d.setDate(d.getDate() + 2);
+if (d.getDay() === 0) d.setDate(d.getDate() + 1);
+document.getElementById('date').value = d.toISOString().split('T')[0];
+
+function setOrigin(la, lo, label) {
+  lat = la; lon = lo;
+  if (marker) map.removeLayer(marker);
+  marker = L.circleMarker([la, lo], {
+    radius: 8, fillColor: '#1a1a2e', fillOpacity: 1, color: 'white', weight: 2
+  }).addTo(map);
+  if (label) document.getElementById('address').value = label;
+  document.getElementById('btn').disabled = !otpReady;
+}
+
+map.on('click', e => setOrigin(e.latlng.lat, e.latlng.lng, null));
+
+// R5 backend health polling — /api/health returns {status:"UP"} once the network is built
+async function pollOTP() {
+  try {
+    const r = await fetch('/api/health', { signal: AbortSignal.timeout(3000) });
+    if (r.ok) {
+      const j = await r.json().catch(() => ({}));
+      if (j.status === 'UP') {
+        document.getElementById('dot').className = 'dot ready';
+        document.getElementById('otp-label').textContent = 'R5 prêt';
+        document.getElementById('status').textContent = 'Cliquez carte ou entrez une adresse';
+        otpReady = true;
+        if (lat !== null) document.getElementById('btn').disabled = false;
+        return;
+      }
+    }
+  } catch {}
+  setTimeout(pollOTP, 5000);
+}
+pollOTP();
+
+// Geocoding
+let geoTimer = null;
+const addrInput = document.getElementById('address');
+const sugEl = document.getElementById('suggestions');
+
+addrInput.addEventListener('input', () => {
+  clearTimeout(geoTimer);
+  const q = addrInput.value.trim();
+  if (q.length < 3) { sugEl.innerHTML = ''; return; }
+  geoTimer = setTimeout(() => geocode(q), 400);
+});
+
+addrInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && lat !== null) calculate();
+});
+
+async function geocode(q) {
+  try {
+    const p = new URLSearchParams({ q: q + ', Sydney NSW', format: 'json', limit: 5, countrycodes: 'au' });
+    const res = await fetch('https://nominatim.openstreetmap.org/search?' + p, {
+      headers: { 'Accept-Language': 'en' }
+    });
+    const results = await res.json();
+    sugEl.innerHTML = '';
+    results.forEach(r => {
+      const div = document.createElement('div');
+      div.className = 'suggestion';
+      const name = r.display_name.replace(/, (New South Wales|NSW), Australia$/, '').replace(/, Australia$/, '');
+      div.textContent = name;
+      div.onclick = () => {
+        sugEl.innerHTML = '';
+        setOrigin(parseFloat(r.lat), parseFloat(r.lon), name.split(',')[0]);
+        map.setView([parseFloat(r.lat), parseFloat(r.lon)], 14);
+      };
+      sugEl.appendChild(div);
+    });
+  } catch {}
+}
+
+document.addEventListener('click', e => { if (!e.target.closest('#panel')) sugEl.innerHTML = ''; });
+
+// Calculate
+document.getElementById('btn').addEventListener('click', calculate);
+
+async function calculate() {
+  if (!lat || !otpReady) return;
+  const btn = document.getElementById('btn');
+  const loader = document.getElementById('loader');
+  const status = document.getElementById('status');
+
+  btn.disabled = true;
+  loader.className = 'on';
+  status.textContent = 'Calcul en cours…';
+  status.className = '';
+
+  isoLayers.forEach(l => map.removeLayer(l));
+  isoLayers = [];
+
+  try {
+    const date = document.getElementById('date').value;
+    const time = document.getElementById('time').value + ':00';
+
+    const p = new URLSearchParams({
+      lat, lon,
+      date,
+      time: time.slice(0, 5),
+      modes: 'TRANSIT,WALK',
+      cutoffs: CUTOFFS.map(c => c.min).join(','),
+    });
+
+    const res = await fetch('/api/isochrone?' + p);
+    if (!res.ok) throw new Error(`R5 ${res.status} — ${await res.text()}`);
+
+    const geojson = await res.json();
+    if (!geojson.features?.length) throw new Error('Aucun résultat (vérifiez date/heure)');
+
+    // Draw largest first (background), smallest last (foreground)
+    const sorted = [...geojson.features].sort(
+      (a, b) => (b.properties.cutoffMinutes ?? b.properties.time ?? 0)
+              - (a.properties.cutoffMinutes ?? a.properties.time ?? 0)
+    );
+
+    sorted.forEach(f => {
+      const mins = f.properties.cutoffMinutes ?? f.properties.time;
+      const cfg = CUTOFFS.find(c => c.min === mins) ?? CUTOFFS.find(c => c.min >= mins) ?? CUTOFFS[0];
+      const layer = L.geoJSON(f, {
+        style: { fillColor: cfg.color, fillOpacity: 0.35, color: cfg.color, weight: 1.5, opacity: 0.7 }
+      }).addTo(map);
+      isoLayers.push(layer);
+    });
+
+    map.fitBounds(L.featureGroup(isoLayers).getBounds(), { padding: [40, 40] });
+    status.textContent = `${sorted.length} bandes calculées · ${date} ${time.slice(0, 5)}`;
+
+  } catch (e) {
+    status.textContent = e.message;
+    status.className = 'error';
+  } finally {
+    btn.disabled = false;
+    loader.className = '';
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+services:
+  r5:
+    build: ./r5
+    volumes:
+      - ./data:/data
+    mem_limit: 7g
+    expose:
+      - "8000"
+
+  app:
+    image: nginx:alpine
+    ports:
+      - "3000:80"
+    volumes:
+      - ./app:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - r5
